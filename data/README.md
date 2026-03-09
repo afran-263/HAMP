@@ -1,68 +1,91 @@
 # Data
 
-This directory stores dataset information, embeddings, and alignments.
-**Do not commit large audio files or raw datasets to this repository.**
+This directory contains dataset preparation instructions. Do NOT upload large audio datasets to this repository.
+
+---
 
 ## Datasets Used
 
-### LibriSpeech
-- Used for training and validation
-- Subset: train-clean-100 (~21 hours, 251 speakers)
-- Validation: dev-clean
-- Test: test-clean
-- Download: https://www.openslr.org/12
+### 1. LibriSpeech (Training)
+- **Subset**: `train-clean-100` (~21 hours used; ~100 hours total)
+- **Download**: https://www.openslr.org/12
+- **Validation/Test**: `dev-clean` and `test-clean` subsets
 
-### L2-Arctic
-- Used for zero-shot MDD evaluation
-- 24 non-native speakers (Hindi, Korean, Mandarin, Spanish, Arabic, Vietnamese)
-- 3599 utterances total with phoneme-level annotations
-- Download: https://psi.engr.tamu.edu/l2-arctic-corpus/
-
-## Expected Directory Layout
-
-After preprocessing, your local `data/` folder should look like:
-
-```
-data/
-├── embeddings/
-│   └── layer_6/         # HuBERT layer-6 .npy files (one per utterance)
-│       ├── 1272-128104-0000.npy
-│       └── ...
-├── l2arctic_embeddings/
-│   └── layer_6/         # Same format for L2-Arctic
-│       └── ...
-├── alignments/          # Forced-alignment .txt files (LibriSpeech)
-│   ├── 1272-128104-0000.txt
-│   └── ...
-└── l2arctic_alignments/ # Forced-alignment .txt files (L2-Arctic)
-    └── ...
+```bash
+wget https://www.openslr.org/resources/12/train-clean-100.tar.gz
+wget https://www.openslr.org/resources/12/dev-clean.tar.gz
+wget https://www.openslr.org/resources/12/test-clean.tar.gz
+tar -xzf train-clean-100.tar.gz
 ```
 
-## Alignment File Format
+### 2. L2-Arctic (Zero-shot Evaluation)
+- **Source**: https://psi.engr.tamu.edu/l2-arctic-corpus/
+- **Details**: 24 non-native English speakers (Hindi, Korean, Mandarin, Spanish, Arabic, Vietnamese), ~1 hour per speaker, 3599 utterances total
+- **Annotations**: Phoneme-level annotations included
 
-Each `.txt` file contains one line per HuBERT frame (20ms):
+---
 
+## Forced Alignment
+
+Phoneme boundaries are required for frame-level articulatory training.
+
+1. Install Kaldi: https://kaldi-asr.org/doc/install.html
+2. Run alignment on LibriSpeech using the standard LibriSpeech recipe:
+```bash
+# Inside kaldi/egs/librispeech/s5
+bash run.sh
 ```
-0 1 SIL
-1 2 SIL
-2 3 HH
-3 4 HH
-4 5 AH
+3. Export alignment text files (one per utterance) to your `alignment_dir`.
+
+Each `.txt` alignment file should be in the format:
+```
+<phoneme> <start_frame> <end_frame>
+SIL 0 5
+HH 6 12
 ...
 ```
 
-Format: `<start_frame> <end_frame> <phoneme>`
+---
 
-## Preprocessing Steps
+## HuBERT Embedding Extraction
 
-1. Download LibriSpeech and L2-Arctic
-2. Run forced alignment (see `scripts/forced_align.py`)
-3. Extract HuBERT embeddings (see `scripts/extract_hubert.py`)
-4. Update paths in `src/train.py` Config class
+After forced alignment, extract HuBERT embeddings using:
 
-## Notes
+```bash
+python scripts/extract_hubert.py \
+    --audio_dir /path/to/librispeech/train-clean-100 \
+    --output_dir /path/to/embeddings \
+```
 
-- HuBERT model used: `facebook/hubert-base-ls960` (frozen during training)
-- Embedding layer: Layer 6 (captures acoustic/articulatory features)
-- Frame shift: 20ms
-- Phoneme set: CMU ARPAbet (stress markers stripped)
+Embeddings are saved as `.npy` files (one per utterance), with shape `[T, 768]` where `T` is the number of 20ms frames.
+
+---
+
+## Expected Directory Layout
+
+```
+/path/to/embeddings/
+    ├── layer_0/
+    |   ├── 1234-5678-0001.npy
+    |   ├── 1234-5678-0002.npy
+    |   └── ...
+    ├── layer_1/
+    |   ├── 1234-5678-0001.npy
+    |   ├── 1234-5678-0002.npy
+    |   └── ...
+    .
+    .
+    .
+    .
+    └── layer_12/
+    ├── 1234-5678-0001.npy
+    ├── 1234-5678-0002.npy
+    └── ...
+
+/path/to/alignment/txt/
+    ├── 1234-5678-0001.txt
+    ├── 1234-5678-0002.txt
+    └── ...
+```
+
+Update `embedding_dir` and `alignment_dir` in `src/train.py` accordingly.
