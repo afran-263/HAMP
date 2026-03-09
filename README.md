@@ -23,15 +23,15 @@ HAMP/
 ├── requirements.txt        ← Python dependencies
 ├── src/
 │   ├── train.py            ← Training script (RoutedPhonemeClassifier + Config)
-│   └── inference.py        ← Inference + evaluation script
+│   └── evaluate.py         ← evaluation script
 ├── scripts/
-│   ├── extract_hubert.py   ← HuBERT embedding extraction script
-│   └── evaluate_per.py     ← PER evaluation on L2-Arctic
+│   └── extract_hubert.py   ← HuBERT embedding extraction script
 ├── data/
 │   └── README.md           ← Dataset download and preparation instructions
 ├── results/
 │   └── sample_outputs/     ← Sample t-SNE plots, PER logs
 └── docs/
+    ├── architecture.md     ← Model architecture
     └── paper.pdf           ← HAMP paper (Interspeech 2026 submission)
 ```
 
