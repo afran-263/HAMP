@@ -98,3 +98,6 @@ built from the CMU phoneme definitions (see `CONSONANT_FEATURES` and `VOWEL_FEAT
 | Label smoothing | 0.1 |
 | Mixup alpha | 0.2 |
 | Gradient clipping | 1.0 |
+
+<img width="965" height="750" alt="image" src="https://github.com/user-attachments/assets/5404cd0a-f195-4671-b4fc-c4220e311c43" />
+
