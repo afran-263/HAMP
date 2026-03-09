@@ -40,7 +40,7 @@ HAMP/
 ## Installation
 
 ```bash
-git clone https://github.com/your-username/HAMP.git
+git clone https://github.com/afran-263/HAMP.git
 cd HAMP
 pip install -r requirements.txt
 ```
